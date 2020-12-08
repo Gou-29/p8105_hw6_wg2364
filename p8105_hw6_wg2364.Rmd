@@ -1,0 +1,70 @@
+---
+title: "Homework 6"
+author: "Wenhao Gou"
+date: "2020/12/8"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(modelr)
+knitr::opts_chunk$set(message = F,
+                      warning = F)
+```
+
+## Question 1:
+
+
+### Clean and tidy the dataset:
+Firstly, create and clean the dataset we need to use in further analysis:
+
+```{r, tidy the dataset}
+homicide_clean = 
+  read_csv("data/homicide-data.csv", na = c("", "NA", "Unknown")) %>% 
+  mutate(
+    city_state = str_c(city, state, sep = ", "),
+    victim_age = as.numeric(victim_age),
+    resolution = case_when(
+      disposition == "Closed without arrest" ~ 0,
+      disposition == "Open/No arrest"        ~ 0,
+      disposition == "Closed by arrest"      ~ 1)
+  ) %>% 
+  filter(
+    victim_race %in% c("White", "Black"),
+    city_state != "Tulsa, AL",
+    city_state != "Dallas, TX",
+    city_state != "Phoenix, AZ",
+    city_state != "Kansas City, MO") %>% 
+  select(city_state, resolution, victim_age, victim_race, victim_sex)
+```
+
+### Logsictic regression on Baltimore, MD
+
+```{r model for Baltimore MD}
+
+model_Baltimore <-
+  homicide_clean %>% 
+  filter(city_state == "Baltimore, MD") %>% 
+  glm(resolution ~ victim_age + victim_race + victim_sex, 
+      data = .,
+      family = binomial())  
+  
+result_Baltimore <- 
+  model_Baltimore %>% 
+  broom::tidy() %>% 
+  mutate(
+    odd_ratio = exp(estimate),
+    CI_lower = exp(estimate - 1.96 * std.error),
+    CI_upper = exp(estimate + 1.96 * std.error)
+  ) %>% 
+  select(term, odd_ratio , starts_with("CI")) %>% 
+  knitr::kable(digits = 3)
+
+```
+
+## Quesiton 2:
+
+
+
+## Question 3:
+
