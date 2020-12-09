@@ -173,7 +173,7 @@ child_df %>%
 
 ### Cross Validation: 
 
-```{r Cross Validaation:}
+```{r Cross Validation:}
 cv_df =
   crossv_mc(child_df,100) %>% 
   mutate(
